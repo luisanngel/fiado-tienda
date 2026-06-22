@@ -638,5 +638,10 @@
     if (e.key === "Enter" && document.activeElement.id === "inp-monto") agregarFiado();
   });
 </script>
+  <script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/fiado-tienda/service-worker.js');
+}
+</script>
 </body>
 </html>
