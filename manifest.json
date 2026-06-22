@@ -3,7 +3,9 @@
   "short_name": "Fiado",
   "description": "Aplicación para registrar y controlar fiados de una tienda",
   "start_url": "/fiado-tienda/",
+  "id": "/fiado-tienda/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#085041",
   "theme_color": "#085041",
   "icons": [
