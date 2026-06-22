@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Fiado Tienda</title>
+<style>
+  :root {
+    --verde: #1D9E75;
+    --verde-claro: #E1F5EE;
+    --verde-oscuro: #085041;
+    --rojo: #E24B4A;
+    --rojo-claro: #FCEBEB;
+    --texto: #2C2C2A;
+    --texto-suave: #5F5E5A;
+    --borde: #D3D1C7;
+    --fondo: #F1EFE8;
+    --blanco: #ffffff;
+    --radio: 12px;
+    --sombra: 0 2px 8px rgba(0,0,0,0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--fondo);
+    color: var(--texto);
+    min-height: 100vh;
+  }
+
+  header {
+    background: var(--verde-oscuro);
+    color: white;
+    padding: 1rem 1.25rem 0.75rem;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  header h1 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  header p {
+    font-size: 0.78rem;
+    opacity: 0.7;
+    margin-top: 2px;
+  }
+
+  .total-bar {
+    background: var(--verde);
+    color: white;
+    padding: 0.6rem 1.25rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+  }
+
+  .total-bar span:last-child {
+    font-weight: 700;
+    font-size: 1rem;
+  }
+
+  main { padding: 1rem; }
+
+  /* Formulario */
+  .card {
+    background: var(--blanco);
+    border-radius: var(--radio);
+    padding: 1rem 1.1rem;
+    box-shadow: var(--sombra);
+    margin-bottom: 1rem;
+  }
+
+  .card-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--texto-suave);
+    margin-bottom: 0.75rem;
+  }
+
+  label {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--texto-suave);
+    margin-bottom: 3px;
+    margin-top: 0.6rem;
+  }
+
+  label:first-of-type { margin-top: 0; }
+
+  input, textarea {
+    width: 100%;
+    border: 1.5px solid var(--borde);
+    border-radius: 8px;
+    padding: 0.55rem 0.75rem;
+    font-size: 1rem;
+    color: var(--texto);
+    background: var(--blanco);
+    outline: none;
+    transition: border-color 0.15s;
+    font-family: inherit;
+  }
+
+  input:focus, textarea:focus {
+    border-color: var(--verde);
+  }
+
+  input[type="number"] { -moz-appearance: textfield; }
+  input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+  textarea { resize: none; height: 60px; font-size: 0.9rem; }
+
+  .btn-agregar {
+    width: 100%;
+    margin-top: 0.85rem;
+    padding: 0.75rem;
+    background: var(--verde);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+  }
+
+  .btn-agregar:active { background: var(--verde-oscuro); transform: scale(0.98); }
+  .btn-agregar:disabled { opacity: 0.5; }
+
+  /* Lista de fiados */
+  .seccion-titulo {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--texto-suave);
+    margin: 0.5rem 0 0.6rem;
+    padding: 0 0.1rem;
+  }
+
+  .fiado-item {
+    background: var(--blanco);
+    border-radius: var(--radio);
+    padding: 0.85rem 1rem;
+    box-shadow: var(--sombra);
+    margin-bottom: 0.6rem;
+    border-left: 4px solid var(--verde);
+    animation: fadein 0.2s ease;
+  }
+
+  .fiado-item.pagado {
+    border-left-color: var(--borde);
+    opacity: 0.65;
+  }
+
+  @keyframes fadein { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  .fiado-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .fiado-desc {
+    font-size: 0.95rem;
+    font-weight: 600;
+    flex: 1;
+  }
+
+  .fiado-monto {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--verde-oscuro);
+    white-space: nowrap;
+  }
+
+  .fiado-item.pagado .fiado-monto {
+    color: var(--texto-suave);
+    text-decoration: line-through;
+  }
+
+  .fiado-meta {
+    font-size: 0.75rem;
+    color: var(--texto-suave);
+    margin-top: 3px;
+  }
+
+  .fiado-nota {
+    font-size: 0.8rem;
+    color: var(--texto-suave);
+    margin-top: 5px;
+    font-style: italic;
+  }
+
+  .fiado-acciones {
+    display: flex;
+    gap: 0.4rem;
+    margin-top: 0.6rem;
+  }
+
+  .btn-mini {
+    flex: 1;
+    padding: 0.4rem 0.5rem;
+    border: 1.5px solid var(--borde);
+    border-radius: 7px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    background: transparent;
+    color: var(--texto-suave);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .btn-mini.pagar {
+    border-color: var(--verde);
+    color: var(--verde-oscuro);
+  }
+
+  .btn-mini.pagar:active { background: var(--verde-claro); }
+
+  .btn-mini.eliminar {
+    border-color: var(--rojo);
+    color: var(--rojo);
+  }
+
+  .btn-mini.eliminar:active { background: var(--rojo-claro); }
+
+  .badge {
+    display: inline-block;
+    font-size: 0.68rem;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 20px;
+    background: var(--verde-claro);
+    color: var(--verde-oscuro);
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+
+  .badge.pagado-badge {
+    background: var(--fondo);
+    color: var(--texto-suave);
+  }
+
+  /* Estado de carga / vacío */
+  .estado-msg {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: var(--texto-suave);
+    font-size: 0.9rem;
+  }
+
+  .spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2.5px solid var(--borde);
+    border-top-color: var(--verde);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin-bottom: 0.5rem;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Config URL */
+  .config-btn {
+    display: block;
+    width: 100%;
+    margin-top: 0.5rem;
+    padding: 0.55rem;
+    background: transparent;
+    border: 1.5px dashed var(--borde);
+    border-radius: 8px;
+    font-size: 0.8rem;
+    color: var(--texto-suave);
+    cursor: pointer;
+    text-align: center;
+  }
+
+  .modal-fondo {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+  }
+
+  .modal-fondo.visible { display: flex; }
+
+  .modal {
+    background: var(--blanco);
+    border-radius: var(--radio);
+    padding: 1.25rem;
+    width: 100%;
+    max-width: 360px;
+  }
+
+  .modal h2 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  .modal p {
+    font-size: 0.82rem;
+    color: var(--texto-suave);
+    margin-bottom: 0.75rem;
+    line-height: 1.5;
+  }
+
+  .modal .btn-agregar { margin-top: 0.5rem; }
+
+  .btn-cancelar {
+    width: 100%;
+    margin-top: 0.5rem;
+    padding: 0.65rem;
+    background: transparent;
+    border: 1.5px solid var(--borde);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    color: var(--texto-suave);
+    cursor: pointer;
+  }
+
+  .toast {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--verde-oscuro);
+    color: white;
+    padding: 0.6rem 1.2rem;
+    border-radius: 30px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: transform 0.25s ease;
+    z-index: 200;
+    white-space: nowrap;
+  }
+
+  .toast.visible { transform: translateX(-50%) translateY(0); }
+  .toast.error { background: var(--rojo); }
+
+  .filtros {
+    display: flex;
+    gap: 0.4rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .filtro-btn {
+    flex: 1;
+    padding: 0.45rem 0.3rem;
+    border: 1.5px solid var(--borde);
+    border-radius: 8px;
+    background: var(--blanco);
+    font-size: 0.8rem;
+    color: var(--texto-suave);
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.15s;
+  }
+
+  .filtro-btn.activo {
+    background: var(--verde-oscuro);
+    color: white;
+    border-color: var(--verde-oscuro);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>📋 Fiado Tienda</h1>
+  <p id="ultimo-sync">Cargando...</p>
+</header>
+
+<div class="total-bar">
+  <span>Total pendiente</span>
+  <span id="total-pendiente">S/ 0.00</span>
+</div>
+
+<main>
+  <!-- Formulario nuevo fiado -->
+  <div class="card">
+    <div class="card-title">➕ Nuevo fiado</div>
+    <label>¿A quién o qué? *</label>
+    <input type="text" id="inp-desc" placeholder="Ej: Juan Pérez — arroz 5kg" autocomplete="off">
+    <label>Monto (S/) *</label>
+    <input type="number" id="inp-monto" placeholder="0.00" step="0.01" min="0">
+    <label>Nota (opcional)</label>
+    <textarea id="inp-nota" placeholder="Ej: Paga el viernes"></textarea>
+    <button class="btn-agregar" id="btn-add" onclick="agregarFiado()">Guardar fiado</button>
+  </div>
+
+  <!-- Lista -->
+  <div class="seccion-titulo">Fiados</div>
+
+  <div class="filtros">
+    <button class="filtro-btn activo" id="f-todos" onclick="setFiltro('todos')">Todos</button>
+    <button class="filtro-btn" id="f-pendiente" onclick="setFiltro('pendiente')">Pendientes</button>
+    <button class="filtro-btn" id="f-pagado" onclick="setFiltro('pagado')">Pagados</button>
+  </div>
+
+  <div id="lista"></div>
+
+  <button class="config-btn" onclick="abrirConfig()">⚙️ Cambiar URL del script</button>
+</main>
+
+<!-- Modal configuración -->
+<div class="modal-fondo" id="modal-config">
+  <div class="modal">
+    <h2>URL del Apps Script</h2>
+    <p>Pega aquí la URL que te dio Google al publicar el Apps Script como app web.</p>
+    <label>URL del script</label>
+    <input type="url" id="inp-url" placeholder="https://script.google.com/macros/s/...">
+    <button class="btn-agregar" onclick="guardarURL()">Guardar y conectar</button>
+    <button class="btn-cancelar" onclick="cerrarConfig()">Cancelar</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const STORAGE_KEY = "fiado_script_url";
+  let scriptURL = localStorage.getItem(STORAGE_KEY) || "";
+  let filtroActual = "todos";
+  let fiados = [];
+  let autoReload;
+
+  // ——— Iniciar ———
+  window.onload = () => {
+    if (!scriptURL) {
+      abrirConfig();
+    } else {
+      cargarFiados();
+      autoReload = setInterval(cargarFiados, 15000);
+    }
+  };
+
+  // ——— Filtro ———
+  function setFiltro(f) {
+    filtroActual = f;
+    ["todos","pendiente","pagado"].forEach(x => {
+      document.getElementById("f-" + x).classList.toggle("activo", x === f);
+    });
+    renderLista();
+  }
+
+  // ——— Cargar fiados ———
+  async function cargarFiados() {
+    if (!scriptURL) return;
+    try {
+      const r = await fetch(scriptURL, { cache: "no-store" });
+      const j = await r.json();
+      if (j.ok) {
+        fiados = j.data.reverse();
+        renderLista();
+        actualizarTotal();
+        document.getElementById("ultimo-sync").textContent =
+          "Actualizado " + new Date().toLocaleTimeString("es", { hour: "2-digit", minute: "2-digit" });
+      }
+    } catch (e) {
+      document.getElementById("ultimo-sync").textContent = "Sin conexión";
+    }
+  }
+
+  // ——— Renderizar lista ———
+  function renderLista() {
+    const lista = document.getElementById("lista");
+    let items = fiados;
+    if (filtroActual !== "todos") items = fiados.filter(f => f.Estado === filtroActual);
+
+    if (items.length === 0) {
+      lista.innerHTML = '<div class="estado-msg">Sin fiados' + (filtroActual !== "todos" ? " " + filtroActual + "s" : "") + '.</div>';
+      return;
+    }
+
+    lista.innerHTML = items.map(f => `
+      <div class="fiado-item ${f.Estado === 'pagado' ? 'pagado' : ''}" id="item-${f.ID}">
+        <div class="fiado-top">
+          <div class="fiado-desc">
+            ${esc(f.Descripcion)}
+            <span class="badge ${f.Estado === 'pagado' ? 'pagado-badge' : ''}">${f.Estado === 'pagado' ? '✓ Pagado' : 'Pendiente'}</span>
+          </div>
+          <div class="fiado-monto">S/ ${parseFloat(f.Monto || 0).toFixed(2)}</div>
+        </div>
+        <div class="fiado-meta">${f.Fecha || ''} ${f.Hora || ''}</div>
+        ${f.Nota ? `<div class="fiado-nota">${esc(f.Nota)}</div>` : ''}
+        <div class="fiado-acciones">
+          ${f.Estado !== 'pagado'
+            ? `<button class="btn-mini pagar" onclick="marcarPagado('${f.ID}')">✓ Marcar pagado</button>`
+            : `<button class="btn-mini" onclick="marcarPendiente('${f.ID}')">↩ Reabrir</button>`
+          }
+          <button class="btn-mini eliminar" onclick="eliminarFiado('${f.ID}')">🗑 Eliminar</button>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  // ——— Total ———
+  function actualizarTotal() {
+    const total = fiados
+      .filter(f => f.Estado === "pendiente")
+      .reduce((s, f) => s + parseFloat(f.Monto || 0), 0);
+    document.getElementById("total-pendiente").textContent = "S/ " + total.toFixed(2);
+  }
+
+  // ——— Agregar ———
+  async function agregarFiado() {
+    const desc = document.getElementById("inp-desc").value.trim();
+    const monto = document.getElementById("inp-monto").value.trim();
+    const nota = document.getElementById("inp-nota").value.trim();
+
+    if (!desc) { toast("Escribe una descripción", true); return; }
+    if (!monto || parseFloat(monto) <= 0) { toast("Escribe un monto válido", true); return; }
+
+    const btn = document.getElementById("btn-add");
+    btn.disabled = true;
+    btn.textContent = "Guardando...";
+
+    try {
+      const r = await fetch(scriptURL, {
+        method: "POST",
+        body: JSON.stringify({ action: "add", descripcion: desc, monto: parseFloat(monto), nota }),
+      });
+      const j = await r.json();
+      if (j.ok) {
+        document.getElementById("inp-desc").value = "";
+        document.getElementById("inp-monto").value = "";
+        document.getElementById("inp-nota").value = "";
+        toast("Fiado guardado ✓");
+        cargarFiados();
+      } else {
+        toast("Error al guardar", true);
+      }
+    } catch { toast("Sin conexión", true); }
+
+    btn.disabled = false;
+    btn.textContent = "Guardar fiado";
+  }
+
+  // ——— Marcar pagado ———
+  async function marcarPagado(id) {
+    await cambiarEstado(id, "pagado");
+  }
+
+  async function marcarPendiente(id) {
+    await cambiarEstado(id, "pendiente");
+  }
+
+  async function cambiarEstado(id, estado) {
+    try {
+      await fetch(scriptURL, {
+        method: "POST",
+        body: JSON.stringify({ action: "update_estado", id, estado }),
+      });
+      toast(estado === "pagado" ? "Marcado como pagado ✓" : "Reabierto");
+      cargarFiados();
+    } catch { toast("Sin conexión", true); }
+  }
+
+  // ——— Eliminar ———
+  async function eliminarFiado(id) {
+    if (!confirm("¿Eliminar este fiado?")) return;
+    try {
+      await fetch(scriptURL, {
+        method: "POST",
+        body: JSON.stringify({ action: "delete", id }),
+      });
+      toast("Fiado eliminado");
+      cargarFiados();
+    } catch { toast("Sin conexión", true); }
+  }
+
+  // ——— Config URL ———
+  function abrirConfig() {
+    document.getElementById("inp-url").value = scriptURL;
+    document.getElementById("modal-config").classList.add("visible");
+  }
+
+  function cerrarConfig() {
+    document.getElementById("modal-config").classList.remove("visible");
+  }
+
+  function guardarURL() {
+    const url = document.getElementById("inp-url").value.trim();
+    if (!url.startsWith("https://script.google.com")) {
+      toast("URL inválida", true); return;
+    }
+    scriptURL = url;
+    localStorage.setItem(STORAGE_KEY, url);
+    cerrarConfig();
+    clearInterval(autoReload);
+    cargarFiados();
+    autoReload = setInterval(cargarFiados, 15000);
+    toast("Conectado ✓");
+  }
+
+  // ——— Toast ———
+  function toast(msg, error = false) {
+    const t = document.getElementById("toast");
+    t.textContent = msg;
+    t.className = "toast visible" + (error ? " error" : "");
+    setTimeout(() => t.classList.remove("visible"), 2500);
+  }
+
+  function esc(s) {
+    return String(s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  }
+
+  // Enter en monto → guardar
+  document.addEventListener("keydown", e => {
+    if (e.key === "Enter" && document.activeElement.id === "inp-monto") agregarFiado();
+  });
+</script>
+</body>
+</html>
