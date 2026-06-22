@@ -1,0 +1,15 @@
+{
+  "name": "Fiado Tienda",
+  "short_name": "Fiado",
+  "start_url": "/fiado-tienda/",
+  "display": "standalone",
+  "background_color": "#085041",
+  "theme_color": "#085041",
+  "icons": [
+    {
+      "src": "https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/1f4cb.png",
+      "sizes": "72x72",
+      "type": "image/png"
+    }
+  ]
+}
