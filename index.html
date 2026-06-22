@@ -458,12 +458,38 @@
     renderLista();
   }
 
+  // ——— JSONP helper ———
+  function fetchJSONP(url) {
+    return new Promise((resolve, reject) => {
+      const cb = "cb_" + Date.now();
+      const script = document.createElement("script");
+      script.src = url + (url.includes("?") ? "&" : "?") + "callback=" + cb;
+      window[cb] = (data) => {
+        delete window[cb];
+        document.body.removeChild(script);
+        resolve(data);
+      };
+      script.onerror = () => {
+        delete window[cb];
+        document.body.removeChild(script);
+        reject(new Error("JSONP error"));
+      };
+      document.body.appendChild(script);
+    });
+  }
+
+  // ——— POST helper (no-cors, datos via URL param) ———
+  async function postData(payload) {
+    const url = scriptURL + "?data=" + encodeURIComponent(JSON.stringify(payload));
+    await fetch(url, { method: "GET", mode: "no-cors" });
+    await new Promise(r => setTimeout(r, 1200));
+  }
+
   // ——— Cargar fiados ———
   async function cargarFiados() {
     if (!scriptURL) return;
     try {
-      const r = await fetch(scriptURL, { cache: "no-store" });
-      const j = await r.json();
+      const j = await fetchJSONP(scriptURL);
       if (j.ok) {
         fiados = j.data.reverse();
         renderLista();
@@ -531,20 +557,12 @@
     btn.textContent = "Guardando...";
 
     try {
-      const r = await fetch(scriptURL, {
-        method: "POST",
-        body: JSON.stringify({ action: "add", descripcion: desc, monto: parseFloat(monto), nota }),
-      });
-      const j = await r.json();
-      if (j.ok) {
-        document.getElementById("inp-desc").value = "";
-        document.getElementById("inp-monto").value = "";
-        document.getElementById("inp-nota").value = "";
-        toast("Fiado guardado ✓");
-        cargarFiados();
-      } else {
-        toast("Error al guardar", true);
-      }
+      await postData({ action: "add", descripcion: desc, monto: parseFloat(monto), nota });
+      document.getElementById("inp-desc").value = "";
+      document.getElementById("inp-monto").value = "";
+      document.getElementById("inp-nota").value = "";
+      toast("Fiado guardado ✓");
+      cargarFiados();
     } catch { toast("Sin conexión", true); }
 
     btn.disabled = false;
@@ -562,10 +580,7 @@
 
   async function cambiarEstado(id, estado) {
     try {
-      await fetch(scriptURL, {
-        method: "POST",
-        body: JSON.stringify({ action: "update_estado", id, estado }),
-      });
+      await postData({ action: "update_estado", id, estado });
       toast(estado === "pagado" ? "Marcado como pagado ✓" : "Reabierto");
       cargarFiados();
     } catch { toast("Sin conexión", true); }
@@ -575,10 +590,7 @@
   async function eliminarFiado(id) {
     if (!confirm("¿Eliminar este fiado?")) return;
     try {
-      await fetch(scriptURL, {
-        method: "POST",
-        body: JSON.stringify({ action: "delete", id }),
-      });
+      await postData({ action: "delete", id });
       toast("Fiado eliminado");
       cargarFiados();
     } catch { toast("Sin conexión", true); }
